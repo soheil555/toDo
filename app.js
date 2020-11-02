@@ -5,6 +5,7 @@ let todoList = document.querySelector(".todo-list");
 let typeSelect = document.querySelector(".filter-todo");
 //Event Listeners
 
+document.addEventListener("DOMContentLoaded", getTodosFromLocalStorage);
 todoBtn.addEventListener("click", addTodo);
 todoList.addEventListener("click", trashCompleteTodo);
 typeSelect.addEventListener("click", changeType);
@@ -26,6 +27,8 @@ function addTodo(event) {
   let todoLi = document.createElement("li");
   todoLi.classList.add("todo-item");
   todoLi.innerText = todoInput.value;
+
+  addTodoToLocalStorage(todoInput.value);
 
   //create completed btn
   let completedBtn = document.createElement("button");
@@ -54,6 +57,7 @@ function trashCompleteTodo(event) {
     todo.classList.toggle("completed");
   } else if (target.classList[0] === "trash-btn") {
     todo.classList.add("fall");
+    deleteTodoFromLocalStorage(todo);
     todo.addEventListener("transitionend", function() {
       todo.remove();
     });
@@ -89,4 +93,70 @@ function changeType(event) {
         break;
     }
   });
+}
+
+function getTodosFromLocalStorage() {
+  let todos = localStorage.getItem("todos");
+  if (todos === null) {
+    todos = [];
+  } else {
+    todos = JSON.parse(todos);
+  }
+
+  todos.forEach(function(todo) {
+    //create todo div
+    let todoDiv = document.createElement("div");
+    todoDiv.classList.add("todo");
+
+    //create todo li
+    let todoLi = document.createElement("li");
+    todoLi.classList.add("todo-item");
+    todoLi.innerText = todo;
+
+    //create completed btn
+    let completedBtn = document.createElement("button");
+    completedBtn.classList.add("complete-btn");
+    completedBtn.innerHTML = "<i class='fas fa-check'></i>";
+
+    //create trash btn
+    let trashBtn = document.createElement("button");
+    trashBtn.classList.add("trash-btn");
+    trashBtn.innerHTML = "<i class='fas fa-trash'></i>";
+
+    //append to todo div
+    todoDiv.appendChild(todoLi);
+    todoDiv.appendChild(completedBtn);
+    todoDiv.appendChild(trashBtn);
+
+    todoList.appendChild(todoDiv);
+  });
+}
+
+function addTodoToLocalStorage(todo) {
+  let todos = localStorage.getItem("todos");
+  if (todos === null) {
+    todos = [];
+  } else {
+    todos = JSON.parse(todos);
+  }
+
+  todos.push(todo);
+  localStorage.setItem("todos", JSON.stringify(todos));
+}
+
+function deleteTodoFromLocalStorage(todo) {
+  let todos = localStorage.getItem("todos");
+  if (todos === null) {
+    todos = [];
+  } else {
+    todos = JSON.parse(todos);
+  }
+
+  let todoText = todo.childNodes[0].innerText;
+
+  let todoIndex = todos.indexOf(todoText);
+
+  todos.splice(todoIndex, 1);
+
+  localStorage.setItem("todos", JSON.stringify(todos));
 }
